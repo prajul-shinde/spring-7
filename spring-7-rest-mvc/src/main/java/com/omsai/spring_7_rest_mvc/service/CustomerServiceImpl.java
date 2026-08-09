@@ -2,6 +2,7 @@ package com.omsai.spring_7_rest_mvc.service;
 
 import com.omsai.spring_7_rest_mvc.model.Customer;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -78,5 +79,14 @@ public class CustomerServiceImpl implements CustomerService {
     public void deleteById(UUID customerId) {
 
         customerMap.remove(customerId);
+    }
+
+    @Override
+    public void patchCustomerById(UUID customerId, Customer customer) {
+
+        Customer existing = customerMap.get(customerId);
+        if (StringUtils.hasText(customer.getName())) {
+            existing.setName(customer.getName());
+        }
     }
 }
