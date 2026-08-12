@@ -76,6 +76,7 @@ class CustomerControllerTest {
     @Test
     void deleteById() throws Exception {
         CustomerDTO customerDTO = customerServiceImpl.getAllCustomers().getFirst();
+        given(customerService.deleteById(any())).willReturn(true);
         mockMvc.perform(delete(CUSTOMER_PATH_ID, customerDTO.getId())
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
@@ -86,6 +87,8 @@ class CustomerControllerTest {
     @Test
     void updateCustomerById() throws Exception {
         CustomerDTO customerDTO = customerServiceImpl.getAllCustomers().getFirst();
+        given(customerService.updateCustomerById(any(), any())).willReturn(Optional.of(CustomerDTO.builder()
+                .build()));
         mockMvc.perform(put(CUSTOMER_PATH_ID, customerDTO.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
