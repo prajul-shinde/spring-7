@@ -126,7 +126,7 @@ class BeerControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(beerDto)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.length()", is(2)));
+                .andExpect(jsonPath("$.length()", is(6)));
     }
 
     @Test
