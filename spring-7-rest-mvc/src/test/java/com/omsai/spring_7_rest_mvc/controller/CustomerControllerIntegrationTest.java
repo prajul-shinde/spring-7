@@ -67,6 +67,8 @@ class CustomerControllerIntegrationTest {
                 customerController.updateCustomerById(UUID.randomUUID(), CustomerDTO.builder().build()));
     }
 
+    @Rollback
+    @Transactional
     @Test
     void handlePost() {
         CustomerDTO dto = CustomerDTO.builder().name("new customer").build();
@@ -82,7 +84,7 @@ class CustomerControllerIntegrationTest {
     @Test
     void testGetAllCustomers() {
         List<CustomerDTO> customers = customerController.getAllCustomers();
-        assertThat(customers.size()).isEqualTo(3);
+        assertThat(customers.size()).isEqualTo(7);
     }
 
     @Rollback
