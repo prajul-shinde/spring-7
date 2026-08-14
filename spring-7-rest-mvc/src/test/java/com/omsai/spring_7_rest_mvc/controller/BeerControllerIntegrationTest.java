@@ -3,7 +3,9 @@ package com.omsai.spring_7_rest_mvc.controller;
 import com.omsai.spring_7_rest_mvc.entities.Beer;
 import com.omsai.spring_7_rest_mvc.mappers.BeerMapper;
 import com.omsai.spring_7_rest_mvc.model.BeerDTO;
+import com.omsai.spring_7_rest_mvc.model.BeerStyle;
 import com.omsai.spring_7_rest_mvc.repositories.BeerRepository;
+import org.hamcrest.core.IsNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
-import static org.hamcrest.core.Is.is;
+import static com.omsai.spring_7_rest_mvc.controller.BeerController.BEER_PATH;
 import static com.omsai.spring_7_rest_mvc.controller.BeerController.BEER_PATH_ID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.core.Is.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -53,6 +57,53 @@ class BeerControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
+    }
+
+    @Test
+    void tesListBeersByStyleAndNameShowInventoryTrue() throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerName", "IPA")
+                        .queryParam("beerStyle", BeerStyle.IPA.name())
+                        .queryParam("showInventory", "true"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(310)))
+                .andExpect(jsonPath("$.[0].quantityOnHand").value(IsNull.notNullValue()));
+    }
+
+    @Test
+    void tesListBeersByStyleAndNameShowInventoryFalse() throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerName", "IPA")
+                        .queryParam("beerStyle", BeerStyle.IPA.name())
+                        .queryParam("showInventory", "false"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(310)))
+                .andExpect(jsonPath("$.[0].quantityOnHand").value(IsNull.nullValue()));
+    }
+
+    @Test
+    void tesListBeersByStyleAndName() throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerName", "IPA")
+                        .queryParam("beerStyle", BeerStyle.IPA.name()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(310)));
+    }
+
+    @Test
+    void tesListBeersByStyle() throws Exception {
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerStyle", BeerStyle.IPA.name()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(548)));
+    }
+
+    @Test
+    void testListBeersByName() throws Exception {
+        mockMvc.perform(get(BEER_PATH)
+                        .queryParam("beerName", "IPA"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()", is(336)));
     }
 
     @Test
@@ -130,7 +181,7 @@ class BeerControllerIntegrationTest {
 
     @Test
     void testListBeers() {
-        List<BeerDTO> beerDTOS = beerController.listBeers();
+        List<BeerDTO> beerDTOS = beerController.listBeers(null, null, false);
         assertThat(beerDTOS.size()).isEqualTo(2413);
     }
 
@@ -139,7 +190,7 @@ class BeerControllerIntegrationTest {
     @Test
     void testListBeersEmptyList() {
         beerRepository.deleteAll();
-        List<BeerDTO> beerDTOS = beerController.listBeers();
+        List<BeerDTO> beerDTOS = beerController.listBeers(null, null, false);
         assertThat(beerDTOS.size()).isEqualTo(0);
     }
 

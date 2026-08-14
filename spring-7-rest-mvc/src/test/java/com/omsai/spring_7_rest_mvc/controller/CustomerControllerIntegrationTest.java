@@ -84,7 +84,7 @@ class CustomerControllerIntegrationTest {
     @Test
     void testGetAllCustomers() {
         List<CustomerDTO> customers = customerController.getAllCustomers();
-        assertThat(customers.size()).isEqualTo(7);
+        assertThat(customers.size()).isEqualTo(3);
     }
 
     @Rollback

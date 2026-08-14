@@ -1,7 +1,9 @@
 package com.omsai.spring_7_rest_mvc.service;
 
+import com.omsai.spring_7_rest_mvc.entities.Beer;
 import com.omsai.spring_7_rest_mvc.mappers.BeerMapper;
 import com.omsai.spring_7_rest_mvc.model.BeerDTO;
+import com.omsai.spring_7_rest_mvc.model.BeerStyle;
 import com.omsai.spring_7_rest_mvc.repositories.BeerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -27,8 +29,34 @@ public class BeerServiceJPA implements BeerService {
     }
 
     @Override
-    public List<BeerDTO> listBeers() {
-        return beerRepository.findAll().stream().map(beerMapper::beerToBeerDto).toList();
+    public List<BeerDTO> listBeers(String beerName, BeerStyle beerStyle, Boolean showInventory) {
+        List<Beer> beers;
+        if (StringUtils.hasText(beerName) && beerStyle == null) {
+            beers = listBeersByName(beerName);
+        } else if (!StringUtils.hasText(beerName) && beerStyle != null) {
+            beers = listBeersByStyle(beerStyle);
+        } else if (StringUtils.hasText(beerName) && beerStyle != null) {
+            beers = listBeersByNameAndStyle(beerName, beerStyle);
+        } else {
+            beers = beerRepository.findAll();
+        }
+
+        if (showInventory != null && !showInventory) {
+            beers.forEach(beer -> beer.setQuantityOnHand(null));
+        }
+        return beers.stream().map(beerMapper::beerToBeerDto).toList();
+    }
+
+    private List<Beer> listBeersByNameAndStyle(String beerName, BeerStyle beerStyle) {
+        return beerRepository.findAllByBeerNameIsLikeIgnoreCaseAndBeerStyle("%" + beerName + "%", beerStyle);
+    }
+
+    public List<Beer> listBeersByStyle(BeerStyle beerStyle) {
+        return beerRepository.findAllByBeerStyle(beerStyle);
+    }
+
+    private List<Beer> listBeersByName(String beerName) {
+        return beerRepository.findAllByBeerNameIsLikeIgnoreCase("%" + beerName + "%");
     }
 
     @Override
