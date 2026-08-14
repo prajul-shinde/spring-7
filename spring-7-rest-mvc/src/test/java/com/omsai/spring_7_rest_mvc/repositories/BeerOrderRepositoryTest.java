@@ -2,6 +2,7 @@ package com.omsai.spring_7_rest_mvc.repositories;
 
 import com.omsai.spring_7_rest_mvc.entities.Beer;
 import com.omsai.spring_7_rest_mvc.entities.BeerOrder;
+import com.omsai.spring_7_rest_mvc.entities.BeerOrderShipment;
 import com.omsai.spring_7_rest_mvc.entities.Customer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,9 @@ class BeerOrderRepositoryTest {
         BeerOrder beerOrder = BeerOrder.builder()
                 .customerRef("Test order")
                 .customer(testCustomer)
+                .beerOrderShipment(BeerOrderShipment.builder()
+                        .trackingNumber("1235r")
+                        .build())
                 .build();
 
         BeerOrder savedBeerOrder = beerOrderRepository.save(beerOrder);
