@@ -2,12 +2,14 @@ package com.omsai.spring_7_rest_mvc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 
+@EnableCaching
 @SpringBootApplication
 public class Spring7RestMvcApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(Spring7RestMvcApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(Spring7RestMvcApplication.class, args);
+    }
 
 }
