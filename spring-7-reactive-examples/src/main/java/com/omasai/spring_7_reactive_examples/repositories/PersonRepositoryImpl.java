@@ -13,7 +13,9 @@ public class PersonRepositoryImpl implements PersonRepository {
 
     @Override
     public Mono<Person> getById(Integer id) {
-        return Mono.just(michael);
+        return findAll().filter(person -> person.getId().equals(id))
+                .single()
+                .doOnError(throwable -> System.out.println("error occurred in flux: " + throwable.getMessage()));
     }
 
     @Override
