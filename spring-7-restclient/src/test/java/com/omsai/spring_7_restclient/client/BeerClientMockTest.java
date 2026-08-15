@@ -130,6 +130,15 @@ public class BeerClientMockTest {
         assertThat(responseDto.getId()).isEqualTo(dto.getId());
     }
 
+    @Test
+    void testGetById() {
+
+        mockGetOperation();
+
+        BeerDTO responseDto = beerClient.getBeerById(dto.getId());
+        assertThat(responseDto.getId()).isEqualTo(dto.getId());
+    }
+
     private void mockGetOperation() {
         server.expect(method(HttpMethod.GET))
                 .andExpect(requestToUriTemplate(URL +

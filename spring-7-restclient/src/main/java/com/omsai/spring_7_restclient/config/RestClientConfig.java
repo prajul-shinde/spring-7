@@ -11,9 +11,6 @@ import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.client.RestClient;
 
-/**
- * Created by jt, Spring Framework Guru.
- */
 @Configuration
 public class RestClientConfig {
 
