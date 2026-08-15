@@ -1,5 +1,6 @@
 package com.omsai.spring_7_rest_mvc.controller;
 
+import com.omsai.spring_7_rest_mvc.config.SpringSecurityConfig;
 import com.omsai.spring_7_rest_mvc.model.CustomerDTO;
 import com.omsai.spring_7_rest_mvc.service.CustomerService;
 import com.omsai.spring_7_rest_mvc.service.CustomerServiceImpl;
@@ -11,6 +12,7 @@ import org.mockito.Captor;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -27,11 +29,13 @@ import static org.hamcrest.core.Is.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(CustomerController.class)
 @ExtendWith(MockitoExtension.class)
+@Import(SpringSecurityConfig.class)
 class CustomerControllerTest {
 
     @Autowired
@@ -51,6 +55,9 @@ class CustomerControllerTest {
     @Captor
     ArgumentCaptor<CustomerDTO> customerArgumentCaptor;
 
+    public static final String USERNAME = "user";
+    public static final String PASSWORD = "password";
+
     @BeforeEach
     void setUp() {
         customerServiceImpl = new CustomerServiceImpl();
@@ -65,7 +72,8 @@ class CustomerControllerTest {
         mockMvc.perform(patch(CUSTOMER_PATH_ID, customerDTO.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerMap)))
+                        .content(objectMapper.writeValueAsString(customerMap))
+                        .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isNoContent());
         verify(customerService).patchCustomerById(uuidArgumentCaptor.capture(), customerArgumentCaptor.capture());
         assertThat(customerDTO.getId()).isEqualTo(uuidArgumentCaptor.getValue());
@@ -78,7 +86,8 @@ class CustomerControllerTest {
         CustomerDTO customerDTO = customerServiceImpl.getAllCustomers().getFirst();
         given(customerService.deleteById(any())).willReturn(true);
         mockMvc.perform(delete(CUSTOMER_PATH_ID, customerDTO.getId())
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isNoContent());
         verify(customerService).deleteById(uuidArgumentCaptor.capture());
         assertThat(customerDTO.getId()).isEqualTo(uuidArgumentCaptor.getValue());
@@ -92,7 +101,8 @@ class CustomerControllerTest {
         mockMvc.perform(put(CUSTOMER_PATH_ID, customerDTO.getId())
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDTO)))
+                        .content(objectMapper.writeValueAsString(customerDTO))
+                        .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isNoContent());
         verify(customerService).updateCustomerById(any(UUID.class), any(CustomerDTO.class));
     }
@@ -109,7 +119,8 @@ class CustomerControllerTest {
         mockMvc.perform(post(CUSTOMER_PATH)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(customerDTO)))
+                        .content(objectMapper.writeValueAsString(customerDTO))
+                        .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"));
     }
@@ -118,7 +129,8 @@ class CustomerControllerTest {
     void getAllCustomers() throws Exception {
         given(customerService.getAllCustomers()).willReturn(customerServiceImpl.getAllCustomers());
         mockMvc.perform(get(CUSTOMER_PATH)
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.length()", is(3)));
@@ -130,7 +142,8 @@ class CustomerControllerTest {
         CustomerDTO testCustomerDTO = customerServiceImpl.getAllCustomers().getFirst();
         given(customerService.getCustomerById(any(UUID.class))).willReturn(Optional.of(testCustomerDTO));
         mockMvc.perform(get(CUSTOMER_PATH_ID, UUID.randomUUID())
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(testCustomerDTO.getId().toString())))
@@ -142,7 +155,8 @@ class CustomerControllerTest {
 
         given(customerService.getCustomerById(any(UUID.class))).willReturn(Optional.empty());
         mockMvc.perform(get(CUSTOMER_PATH_ID, UUID.randomUUID())
-                        .accept(MediaType.APPLICATION_JSON))
+                        .accept(MediaType.APPLICATION_JSON)
+                        .with(httpBasic(USERNAME, PASSWORD)))
                 .andExpect(status().isNotFound());
     }
 }
