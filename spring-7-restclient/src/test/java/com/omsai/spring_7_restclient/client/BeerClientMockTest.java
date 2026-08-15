@@ -3,6 +3,7 @@ package com.omsai.spring_7_restclient.client;
 import com.omsai.spring_7_restclient.config.OAuthClientInterceptor;
 import com.omsai.spring_7_restclient.config.RestClientConfig;
 import com.omsai.spring_7_restclient.model.BeerDTO;
+import com.omsai.spring_7_restclient.model.BeerDTOPageImpl;
 import com.omsai.spring_7_restclient.model.BeerStyle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import org.springframework.boot.restclient.test.autoconfigure.RestClientTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.oauth2.client.InMemoryOAuth2AuthorizedClientService;
@@ -32,6 +34,7 @@ import tools.jackson.databind.ObjectMapper;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -163,6 +166,19 @@ public class BeerClientMockTest {
         server.verify();
     }
 
+    @Test
+    void testListBeers() {
+        String payload = objectMapper.writeValueAsString(getPage());
+
+        server.expect(method(HttpMethod.GET))
+                .andExpect(requestTo(URL + BeerClientImpl.GET_BEER_PATH))
+                .andRespond(withSuccess(payload, MediaType.APPLICATION_JSON));
+
+        Page<BeerDTO> dtos = beerClient.listBeers();
+        assertThat(dtos.getContent().size()).isGreaterThan(0);
+    }
+
+
     private void mockGetOperation() {
         server.expect(method(HttpMethod.GET))
                 .andExpect(requestToUriTemplate(URL +
@@ -180,5 +196,9 @@ public class BeerClientMockTest {
                 .quantityOnHand(500)
                 .upc("123245")
                 .build();
+    }
+
+    BeerDTOPageImpl getPage() {
+        return new BeerDTOPageImpl(Arrays.asList(getBeerDto()), 1, 25, 1);
     }
 }
