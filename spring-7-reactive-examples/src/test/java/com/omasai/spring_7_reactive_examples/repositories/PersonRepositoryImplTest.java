@@ -4,6 +4,7 @@ import com.omasai.spring_7_reactive_examples.domain.Person;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 
@@ -25,6 +26,25 @@ class PersonRepositoryImplTest {
         personMono.subscribe(person -> {
             System.out.println(person.toString());
         });
+    }
+
+    @Test
+    void testGetByIdFoundStepVerifier() {
+        Mono<Person> personMono = personRepository.getById(3);
+
+        StepVerifier.create(personMono).expectNextCount(1).verifyComplete();
+
+        personMono.subscribe(person -> {
+            System.out.println(person.getFirstName());
+        });
+    }
+
+    @Test
+    void testGetByIdNotFoundStepVerifier() {
+        Mono<Person> personMono = personRepository.getById(8);
+
+        StepVerifier.create(personMono).expectNextCount(0).verifyComplete();
+        personMono.subscribe(System.out::println);
     }
 
     @Test
@@ -79,7 +99,7 @@ class PersonRepositoryImplTest {
     void testGetByIdNotFound() {
         Flux<Person> personFlux = personRepository.findAll();
         Integer id = 8;
-        Mono<Person> personMono = personFlux.filter(p -> p.getId() == id)
+        Mono<Person> personMono = personFlux.filter(p -> p.getId().equals(id))
                 .single()
                 .doOnError(throwable ->
                         System.out.println("error occurred in flux: " +
