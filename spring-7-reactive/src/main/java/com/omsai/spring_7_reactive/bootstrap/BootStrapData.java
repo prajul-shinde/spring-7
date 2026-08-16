@@ -1,7 +1,9 @@
 package com.omsai.spring_7_reactive.bootstrap;
 
 import com.omsai.spring_7_reactive.domain.Beer;
+import com.omsai.spring_7_reactive.domain.Customer;
 import com.omsai.spring_7_reactive.repositories.BeerRepository;
+import com.omsai.spring_7_reactive.repositories.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
