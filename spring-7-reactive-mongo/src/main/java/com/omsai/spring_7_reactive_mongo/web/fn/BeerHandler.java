@@ -3,9 +3,11 @@ package com.omsai.spring_7_reactive_mongo.web.fn;
 import com.omsai.spring_7_reactive_mongo.model.BeerDTO;
 import com.omsai.spring_7_reactive_mongo.services.BeerService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
@@ -16,19 +18,23 @@ public class BeerHandler {
     private final BeerService beerService;
 
     public Mono<ServerResponse> deleteBeerById(ServerRequest serverRequest) {
-        return beerService.deleteBeerById(serverRequest.pathVariable("beerId"))
+        return beerService.getById(serverRequest.pathVariable("beerId"))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
+                .flatMap(beerDTO -> beerService.deleteBeerById(beerDTO.getId()))
                 .then(ServerResponse.noContent().build());
     }
 
     public Mono<ServerResponse> patchBeerById(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(BeerDTO.class)
                 .flatMap(beerDTO -> beerService.patchBeer(serverRequest.pathVariable("beerId"), beerDTO))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .flatMap(savedDto -> ServerResponse.noContent().build());
     }
 
     public Mono<ServerResponse> updateBeerById(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(BeerDTO.class)
                 .flatMap(beerDto -> beerService.updateBeer(serverRequest.pathVariable("beerId"), beerDto))
+                .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND)))
                 .flatMap(savedDto -> ServerResponse.noContent().build());
     }
 
@@ -43,7 +49,8 @@ public class BeerHandler {
     public Mono<ServerResponse> getBeerById(ServerRequest serverRequest) {
 
         return ServerResponse.ok()
-                .body(beerService.getById(serverRequest.pathVariable("beerId")), BeerDTO.class);
+                .body(beerService.getById(serverRequest.pathVariable("beerId"))
+                        .switchIfEmpty(Mono.error(new ResponseStatusException(HttpStatus.NOT_FOUND))), BeerDTO.class);
     }
 
     public Mono<ServerResponse> listBeers(ServerRequest serverRequest) {
