@@ -15,13 +15,18 @@ public class BeerHandler {
 
     private final BeerService beerService;
 
+    public Mono<ServerResponse> updateBeerById(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(BeerDTO.class)
+                .flatMap(beerDto -> beerService.updateBeer(serverRequest.pathVariable("beerId"), beerDto))
+                .flatMap(savedDto -> ServerResponse.noContent().build());
+    }
+
     public Mono<ServerResponse> saveNewBeer(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(BeerDTO.class)
                 .flatMap(beerService::saveBeer)
                 .flatMap(beerDTO -> ServerResponse
                         .created(UriComponentsBuilder.fromUriString(BeerRouterConfig.BEER_PATH_ID).build(beerDTO.getId()))
                         .build());
-
     }
 
     public Mono<ServerResponse> getBeerById(ServerRequest serverRequest) {
